@@ -1,0 +1,7 @@
+#!/bin/sh
+find . -name '*~' -exec rm -rf '{}' ';'
+find . -name '*.~' -exec rm -rf '{}' ';'
+find . -name '*.bak' -exec rm -rf '{}' ';'
+find . -name '*.bk' -exec rm -rf '{}' ';'
+find . -name '*.org' -exec rm -rf '{}' ';'
+find . -name '*.new' -exec rm -rf '{}' ';'

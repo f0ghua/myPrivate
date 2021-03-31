@@ -1,0 +1,5 @@
+#! /bin/sh
+cd /home/fog/soft/notes
+export LD_LIBRARY_PATH=$PWD:$PWD/jvm/bin/classic:$LD_LIBRARY_PATH
+echo "./notes $@" > /tmp/notes_nsf.log
+./notes $@ &> /tmp/run_notes_nsf.log

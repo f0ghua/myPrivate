@@ -1,0 +1,18 @@
+#!/bin/sh
+#-----------------------------------------------
+# This script file is used for servers start
+# - Fog 2002/11/11
+#----------------------------------------------
+# PPPOE server start
+killall pppoe-server
+pppoe-server -I eth0 -L 10.8.1.1 -R 10.8.1.2
+# PPTP server start
+killall pptpd
+pptpd
+# Add policies for visit internet
+# Set ip_forward bit 
+echo 1 > /proc/sys/net/ipv4/ip_forward
+# Add a nat policy for ppp out
+iptables -t nat -F
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE 
+

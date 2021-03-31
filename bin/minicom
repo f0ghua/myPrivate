@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export LC_LANG=POSIX
+export LC_CTYPE=POSIX
+
+/usr/bin/minicom $1

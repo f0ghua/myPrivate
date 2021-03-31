@@ -1,0 +1,219 @@
+#!/bin/bash
+TOOL_PATH=./tools
+S0=$0
+COMM=${S0##*/bb}
+OMFFILENAME="ip505t.omf"
+OMFILES=""
+OMFFILENUM=0
+OMFLOCATON=0
+FILEPRE="ip505t"
+function echoErrMsg(){
+    echo -e "\033[44;38m\c"
+    echo -e $1
+    echo -e "\033[40;0m"
+}
+
+if [ $# -ne 0 ]
+then
+    echo  -e "\033[44;38m\c"
+    echo "This shell program no need any parameters."
+    echo -e "It will bind \c"
+    echo -e "\033[40;0m\c "
+    
+    echo -e "\033[43;31m\c"
+    echo -e "xxx.omf\c"
+    echo -e "\033[40;0m\c"
+    
+    echo  -e "\033[44;38m\c"
+    echo -e ", \c"
+    echo -e "\033[40;0m\c "
+    
+    echo -e "\033[46;33m\c"
+    echo -e "move.bin\c"
+    echo -e "\033[40;0m\c"
+    
+    echo  -e "\033[44;38m\c"
+    echo -e ", \c"
+    echo -e "\033[40;0m\c "
+
+    
+    echo -e "\033[45;34m\c"
+    echo -e "boot.bin\c"
+    echo -e "\033[40;0m\c"
+   
+    echo  -e "\033[44;38m\c"
+    echo -e ", \c"
+    echo -e "\033[40;0m\c "
+    
+    echo -e "\033[42;35m\c"
+    echo -e "xxx.pid\c"
+    echo -e "\033[40;0m\c"
+    
+    echo  -e "\033[44;38m\c"
+    echo -e " into \c"
+    echo -e "\033[40;0m\c "
+
+    echo -e "\033[41;33m\c"
+    echo -e "xxx.bin\c"
+    echo -e "\033[40;0m\c"
+    
+    echo  -e "\033[44;38m\c"
+    echo -e " bases \c"
+    echo -e "\033[40;0m\c "
+
+    echo -e "\033[47;36m\c"
+    echo -e "xxx.par.\c"
+    echo -e "\033[40;0m"
+
+    exit 1
+fi
+#first delete all cps and img file
+rm -f *.img 2>/dev/null
+rm -f *.cps 2>/dev/null
+rm -f *.bin 2>/dev/null
+#Check if tools exist.
+#if [ ! -f lzhuf -o ! -f armbind -o ! -f compress ] ; then
+#    echoErrMsg "Sorry , please make sure that you have bind tools named lzhuf,armbind and compress!\c"
+#    exit 2
+#fi
+#Check if tools can be executed.
+#if [ ! -x lzhuf -o ! -x armbind -o ! -x compress ] ; then
+#    chmod +x lzhuf 2>/dev/null
+#    chmod +x armbind 2>/dev/null
+#    chmod +x compress 2>/dev/null
+#fi
+#if [ ! -x lzhuf -o ! -x armbind -o ! -x compress ] ; then
+#    echoErrMsg "Sorry , please make sure that you have the execute permission of lzhuf,armbind and compress!\c"
+#    exit 2
+#fi
+
+#Check if omf file is exist if not then try to make it.
+OMFFILENUM=0
+OMFILES=`ls *.omf 2>/dev/null`
+for OMFFILENAME in $OMFILES
+do
+    OMFFILENUM=`expr $OMFFILENUM + 1`
+done
+if [ $OMFFILENUM -gt 1 ] ; then
+    echoErrMsg "Sorry , more then one omf files. Please check you makefile!\c"
+    exit 1
+fi
+if [ $OMFFILENUM -eq 0 ] ; then
+    #If directory's name is not product no need to try make.
+    if [ `basename $PWD` != "product" ] ; then
+        echoErrMsg "Sorry , please make sure that OMF file is exist!\c"
+        exit 3
+    fi
+    make 2>/dev/null
+fi
+OMFFILENUM=0
+OMFILES=`ls *.omf 2>/dev/null`
+for OMFFILENAME in $OMFILES
+do
+    OMFFILENUM=`expr $OMFFILENUM + 1`
+done
+##echo "omf file's number is : "$OMFFILENUM
+##sleep 1
+if [ $OMFFILENUM -gt 1 ] ; then
+    echoErrMsg "Sorry , more then one omf files. Please check you makefile!\c"
+    exit 1
+fi
+if [ $OMFFILENUM -eq 0 ] ; then
+    echoErrMsg "Sorry , I can't get OMF file! Please check if your code has some errors!\c"
+    exit 1
+fi
+
+#get file prefix ex: ip505t.omf is ip505t
+
+OMFFILENAME=`ls *.omf 2>/dev/null`
+FILEPRE=${OMFFILENAME%.omf}
+rm -f $FILEPRE.bin
+
+#add by  snow,check the RAM overflow
+mips-objdump -x elf>elf.map
+ENDPOINTSTRING=`grep "00000000 _end" elf.map|awk '{print $1}'`
+ENDPOINTSTRING=`echo $ENDPOINTSTRING | tr "[:lower:]" "[:upper:]"`
+ENDPOINTSTRING=0x$ENDPOINTSTRING
+echo $ENDPOINTSTRING
+
+if [ "$FILEPRE" = "fvl328" ] ; then
+TOPRAMSIZE="081000000"
+fi
+if [ "$FILEPRE" = "ip806dv" ] ; then
+TOPRAMSIZE="081000000"
+fi
+if [ "$FILEPRE" = "wrt54g" ] ; then
+TOPRAMSIZE="082000000"
+fi
+if [ "$FILEPRE" = "ip505dv2" ] ; then
+TOPRAMSIZE="081000000"
+fi
+if [ "$FILEPRE" = "ip505dv" ] ; then
+TOPRAMSIZE="081000000"
+fi
+if [ "$FILEPRE" = "ip505va" ] ; then
+TOPRAMSIZE="080800000"
+fi
+if [ "$FILEPRE" = "ip509dv" ] ; then
+TOPRAMSIZE="081000000"
+fi
+
+isBig=$( echo "ibase=16; ${ENDPOINTSTRING#0x} > $TOPRAMSIZE"|bc )
+if [ $isBig -gt 0 ]; then
+    echo "***!***RAM overflow***!***"
+    exit 1
+fi
+
+#Check if boot.bin is exist if not then try to get it.
+
+#if [ ! -f boot.bin ] ; then
+#    #If directory's name is not product no need to try make.
+#    if [ `basename $PWD` != "product" ] ; then
+#        echoErrMsg "Sorry , please make sure that boot.bin is exist!\c"
+#        exit 4
+#    fi
+#    cp ../mipsdriver/protect/boot.bin . 2>/dev/null
+#fi
+#if [ ! -f boot.bin ] ; then
+#    echoErrMsg "Sorry , please make sure that boot.bin is exist!\c"
+#    exit 4
+#fi
+#
+#Check if move.bin is exist if not then try to make and get it.
+#if [ -z $COMM ] ; then
+#if [ ! -f move.bin ] ; then
+#    #If directory's name is not product no need to try make.
+#    if [ `basename $PWD` != "product" ] ; then
+#        echoErrMsg "Sorry , please make sure that move.bin is exist!\c"
+#        exit 5
+#    fi
+#    cd ../mipsdriver/move            2>/dev/null
+#    if [ ! -f move.bin ] ; then
+#        make                         2>/dev/null
+#    fi
+#    cd ../../product                 2>/dev/null
+#    cp ../mipsdriver/move/move.bin . 2>/dev/null
+#fi
+#if [ ! -f move.bin ] ; then
+#    echoErrMsg "Sorry , please make sure that move.bin is exist!\c"
+#    exit 5
+#fi
+#fi
+#Check if par and pid exist
+if [ ! -f $FILEPRE.par -o ! -f $FILEPRE.pid ] ; then
+    echoErrMsg "Sorry,please make sure that you have the par and pid files !\c"
+    exit 6
+fi
+##echo "omf file name is : "$OMFFILENAME
+##sleep 2
+if [ -z $COMM ] ; then
+
+#./lz/lzhuf e $OMFFILENAME $FILEPRE.cps
+zip $FILEPRE.cps $OMFFILENAME
+fi
+${TOOL_PATH}/mipsBind $FILEPRE.par $FILEPRE.bin
+rm *.img 2>/dev/null
+${TOOL_PATH}/mipsCompress $FILEPRE.bin sErCoMm EraseAll
+mv $FILEPRE.img $FILEPRE"_a.img"
+${TOOL_PATH}/mipsCompress $FILEPRE.bin
+

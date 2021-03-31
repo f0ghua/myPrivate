@@ -1,0 +1,10 @@
+NOTESBIN=/home/fog/soft/notes7/notes
+NOTESDATA=/home/fog/soft/notes7/notes/data
+NOTESDIR=/home/fog/soft/notes7/notes/data
+LD_LIBRARY_PATH=$NOTESBIN:$NOTESBIN/jvm/bin/classic:$NOTESBIN/jvm/bin:$LD_LIBRARY_PATH
+PATH=$NOTESBIN/jvm/bin:$NOTESBIN:$PATH
+CLASSPATH=./:$NOTESBIN/:$CLASSPATH
+export NOTESBIN NOTESDATA NOTESDIR LD_LIBRARY_PATH PATH CLASSPATH
+
+/home/fog/soft/notes7/notes/notes
+#/opt/ibm/Workplace\ Managed\ Client/rcp/richclient -personality com.ibm.workplace.noteswc.standalone.linux.personality

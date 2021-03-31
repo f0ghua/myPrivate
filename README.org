@@ -1,0 +1,13 @@
+* How to setup the env
+
+Add following lines to ~/.bashrc
+
+#+begin_src sh
+if [ -f ~/myPrivate/customize/bash/conf_bashrc ]; then
+    . ~/myPrivate/customize/bash/conf_bashrc
+fi
+
+if [ -f ~/myPrivate/customize/bash/conf_bash_aliases ]; then
+    . ~/myPrivate/customize/bash/conf_bash_aliases
+fi
+#+end_src

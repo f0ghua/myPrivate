@@ -1,0 +1,54 @@
+#!/bin/bash
+#echo "in copycc2htm"
+BADARG=0
+if [ $# != 3 ] ; then
+    BADARG=1
+fi
+#echo $BADARG
+#sleep 1
+if [ ! -d $1 ] ; then
+    BADARG=1
+fi
+#echo $BADARG
+#sleep 1
+if [ ! -d $2 ] ; then
+    BADARG=1
+fi
+#echo $BADARG
+#sleep 1
+#echo $PWD
+#echo `file $1$3`
+if [ ! -f $1$3 ] ; then
+    BADARG=1
+fi
+#echo $BADARG
+#sleep 1
+if [ $BADARG = 1 ]
+then
+    echo -e "\033[44;38m"
+    echo "-------------------------------------------------------------------"
+    echo "This shell program copy file "FILE" in directory1 to directory2 and "
+    echo "change it's ext filename to \".htm\""
+    echo "Usage: copycc2htm directory1 directory2 FILE                         "
+    echo "example : ./copycc2htm ./505l.neu/ ../ blank.cc                        "
+    echo "This command will copy file \"blank.cc\" in ./505l.neu to .. and  "
+    echo "change it's name to \"blank.htm\"                                    "
+    echo "-------------------------------------------------------------------"
+    echo -e "\033[40;0m"
+    exit 1
+fi
+    CCFILE=$3
+    DOTPOINT=`expr index $CCFILE "."`
+    LEN=`expr $DOTPOINT - 1`
+#    echo "LEN="$LEN
+#    sleep 1
+    HTMFILEEX=`expr substr $CCFILE 1 $LEN`
+#    echo "HTMFILEEX="$HTMFILEEX
+#    sleep 1
+     HTMFILE=$HTMFILEEX".htm"
+#    echo "CCFILE="$CCFILE
+#    echo "copying "$1/$CCFILE" to "$2/$HTMFILE 
+    cp $1$CCFILE $2$HTMFILE -f 2>/dev/null
+#    sleep 1
+#done
+

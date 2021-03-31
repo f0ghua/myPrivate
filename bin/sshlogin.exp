@@ -1,0 +1,59 @@
+#!/usr/bin/expect -f
+
+set server [lindex $argv 0]
+set username [lindex $argv 1]
+set password [lindex $argv 2]
+set port [lindex $argv 3]
+
+set ERR_PERMISSION_DENIED 1
+set ERR_DIR_OR_FILE_NOT_EXIST 2
+set ERR_TIMEOUT 3
+set ERR_CONNECTION_REFUSED 4
+set ERR_INVALID_ARGUMENT 5
+
+spawn ssh -qfN -D 7777 -l $username $server -p $port
+
+#timeout in sec, default 10
+set timeout 120
+
+expect {
+    "*(yes/no)*" {
+        send "yes\r"
+        exp_continue
+    }
+    "*password*" {
+        send "$password\r"
+        set timeout 5
+        exp_continue
+    }
+    eof { # indicate spawn finish
+        send_user "eof"
+    }
+}
+#expect timeout
+
+#expect {
+#    #first connect, no public key in ~/.ssh/known_hosts
+#
+#    "Are you sure you want to continue connecting (yes/no)?" {
+#        send "yes\r"
+#        expect "password:"
+#        send "$password\r"
+#    }
+#    #already has public key in ~/.ssh/known_hosts
+#
+#    "password:" {
+#        send "$password\r"
+#    }
+#
+#    "Connection refused" {
+#        expect eof
+#        exit $ERR_CONNECTION_REFUSED
+#    }
+#    #connetion error
+#
+#    timeout {
+#        exit $ERR_TIMEOUT
+#    }
+#
+#}

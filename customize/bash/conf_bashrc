@@ -1,0 +1,35 @@
+
+#BRECIS_PATH=/opt/BRECIS/i686-pc-linux-gnu-x-mipsisa32-elf-newlib/bin
+#TI_PATH=/opt/toolchains/mips/bin
+#MVISTA_PATH=/opt/mvista/xscale_be/bin
+#ARMBE_PATH=/home/fog/tmp/toolchain/buildroot/build_armeb/staging_dir/bin
+#ARMBE_PATH=/opt/armeb-xscale/build_armeb/staging_dir/bin
+#HARDHAT_PATH=/opt/hardhat/devkit/mips/fp_le/bin
+#REALTEK_PATH=/opt/toolchain_mips/bin
+
+export EDITOR=vi
+export PATH=$HOME/bin:$HOME/bin/sercomm:$HOME/private/tool/utilities:$PATH:$BRECIS_PATH:$TI_PATH:$MVISTA_PATH:$ARMBE_PATH:$HARDHAT_PATH:$REALTEK_PATH:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/local/sopcast
+
+# Bash settings
+# ignore repeat commands
+export HISTCONTROL=ignoredups
+# ignore commands split by ':'
+export HISTIGNORE="[   ]*:&:bg:fg:exit"
+# set history file size
+export HISTFILESIZE=1000000000
+# set history command numbers
+export HISTSIZE=1000000
+# use history append mode to instead of overwrite mode
+shopt -s histappend
+# record each command immediately
+PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+
+PS1='\u@\W\$ '
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac

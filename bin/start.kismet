@@ -1,0 +1,9 @@
+#!/bin/sh
+#PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
+cardctl scheme kismet
+ifconfig eth1 down
+#kismet -i eth1
+ifconfig wifi0 up
+echo "Mode: r" > /proc/driver/aironet/eth1/Config
+echo "Mode: y" > /proc/driver/aironet/eth1/Config
+{ mlterm -e kismet ; stop.kismet; }

@@ -1,0 +1,23 @@
+#!/bin/sh
+HTML_PATH=../../../http/file.htm
+
+if [ $# -ne 1 ] ; then
+    echo "no assigned html directory,make it to default: "
+    echo "*path = ../../../http/file.htm/"
+else
+    HTML_PATH=$1
+fi
+if [  ! -d $HTML_PATH ] ; then
+    echo "This shell program's parameter must be a directory!"
+    exit 1
+fi
+echo "generating html and gif script..."
+cd $HTML_PATH
+transfilename
+grep -v '^rem'  html.bat|tr '\134'[A-Z] /[a-z]|tr -d '\r'|sed 's/..\/..\/tool\///' >html
+grep -v '^rem'  gif.bat|tr '\134'[A-Z] /[a-z]|tr -d '\r'|sed 's/..\/..\/tool\///' >gif
+#grep -v '^rem'  html.bat|tr '\134'[A-Z] /[a-z]|tr -d '\r' >html
+#grep -v '^rem'  gif.bat|tr '\134'[A-Z] /[a-z]|tr -d '\r' >gif
+chmod 755 html
+chmod 755 gif
+

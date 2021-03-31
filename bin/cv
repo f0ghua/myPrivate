@@ -1,0 +1,19 @@
+#!/bin/bash
+#scriptname:conver
+
+cat<<info
+2]  10=>2   16]  10=>16   10] 16 => 10
+info
+input=$1
+#read input?"please enter your choice:"
+case $input in
+2)      echo -n "please a dec number:";read i1
+        echo "$i1==$(echo "obase=2;$i1"|bc)";;
+16)      echo -n "please a dec number:";read i2
+        echo "$i2==$(echo "obase=16;$i2"|bc)";;
+10)      echo -n "please a hex number:";read i2
+	i2=`echo $i2 | tr "[:lower:]" "[:upper:]"`
+        echo "$i2==$(echo "ibase=16;$i2"|bc)";;
+*)      echo "wrong choice!"
+        exit 1 ;;
+esac

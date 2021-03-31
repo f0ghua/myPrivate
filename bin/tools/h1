@@ -1,0 +1,50 @@
+#!/bin/bash
+
+SCRIPT_PATH=~/bin/tools
+
+if [ -d $1 ] ; then
+    HTMLDIR=$1
+    cd $HTMLDIR
+    FILES=`find * -newer html`
+elif [ -f $1 ] ; then
+    HTMLDIR=`dirname $1`
+    cd $HTMLDIR
+    FILES=$1
+else
+    echo "Usage: $0 <directory contains html files|html file>"
+    exit 1
+fi
+#echo $FILES
+#sleep 2
+for FILE in $FILES
+do
+    HTMLBASE=`basename $FILE`
+    DOTPOINT=`expr index $HTMLBASE "."`
+    CCFILEEX=`expr substr $HTMLBASE 1 $DOTPOINT`
+    CCFILE=$CCFILEEX"cc"
+#    echo "dir="$HTMLDIR
+#    echo "base="$HTMLBASE
+#    echo "ccfile="$CCFILE
+#    sleep 2
+#    echo $PWD
+    COMM=`grep -w "$HTMLBASE" html`
+#    echo "after grep html COMM is $COMM"
+#    sleep 2
+    if [ -z "$COMM" ] ; then
+	COMM=`grep " $HTMLBASE" gif`
+    fi
+#    echo "after grep gif  COMM is $COMM"
+#    sleep 2
+    if [ -z "$COMM" ] ; then
+	continue
+    fi
+#    echo $COMM
+#    sleep 1
+    echo "Rebuilding $FILE ..."
+    `$COMM`
+
+    ${SCRIPT_PATH}/copycc2c ./ ../ $CCFILE
+done
+touch html gif
+
+

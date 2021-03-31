@@ -1,0 +1,62 @@
+#!/bin/bash
+
+HTML_PATH=../../../http/file.htm
+TOOL_PATH=~/bin/tools
+SCRIPT_PATH=~/bin/tools
+
+if [ $# -ne 1 ] ; then
+    echo "no assigned html directory,make it to default: "
+    echo "*path = ../../../http/file.htm/505dv.neu/"
+else
+    HTML_PATH=$1
+fi
+
+if [  ! -d $HTML_PATH ] ; then
+    echo "This shell program's parameter must be a directory!"
+    exit 1
+fi
+
+cd $HTML_PATH
+
+#first check if "html.bat","gif.bat","html","gif" are exist
+if [ ! -e html -o ! -e html.bat -o ! -e gif -o ! -e gif.bat ] ; then
+    ${SCRIPT_PATH}/first .
+else
+    # then check ".bat" files are newer then "html" and "gif"
+    HTMLNEWER=`find html.bat -newer html`
+    GIFNEWER=`find gif.bat -newer gif`
+    if [ -n "$HTMLNEWER" -o -n "$GIFNEWER" ] ; then
+        ${SCRIPT_PATH}/first .
+    fi
+fi
+
+rm -f h_fdef.* H_FDEF.*
+rm -f filelist.c FILELIST.C
+rm -f html.rst HTML.RST
+rm -f *.cc *.CC
+rm -f h_bmsg.* H_BMSG.*
+echo "Converting html files to c files ..."
+./html
+#sleep 1
+echo "Converting gif files to c files ..."
+./gif
+touch html
+#sleep 1
+${TOOL_PATH}/butmsg err_msg.dat
+${TOOL_PATH}/makemak
+#sleep 1
+rm -f ../../_*.c
+echo "Copying all cc files in file.htm to http ..."
+${SCRIPT_PATH}/copyallcc2c ./ ../../
+cp h_fdef.* ../../
+cp filelist.c ../../
+cp h_bmsg.* ../../
+#cp nchkpsw.c ../..
+cp html.mk ../../
+
+#cd ../tool
+#cp modems.c ..
+#cp modemdh.h ..
+cd ..
+
+

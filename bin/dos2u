@@ -1,0 +1,32 @@
+#!/bin/sh
+# ===========================================================
+# This Shell Script can convert all files in a certain
+# Directory from DOS format to UNIX format
+# ===========================================================
+usage()
+{
+  echo -e "\033[45;37m"
+  echo "===================================================="
+  echo " Usage : dos2u <directory> [file type]              "
+  echo " For Example : dos2u doc '*.c'                      "
+  echo "                                  Fog 2002-2-5      "
+  echo "===================================================="
+  echo -e "\033[40;0m"
+  exit 1
+}
+
+if [ $# -eq 0 ]
+then
+  usage
+fi
+
+if [ $# -eq 1 ]
+then
+  find $1 ! -type d|xargs dos2unix
+fi
+
+if [ $# -eq 2 ]
+then
+  find $1 ! -type d -name $2|xargs dos2unix
+fi
+  

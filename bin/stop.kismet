@@ -1,0 +1,26 @@
+#!/bin/sh
+#PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
+
+#kismet_unmonitor -i eth0
+ifconfig eth1 down
+ifconfig wifi0 down
+
+cardctl scheme none
+
+echo "reseting card parms..."
+
+#iwconfig wifi0 channel 3
+#iwconfig wifi0 mode ad-hoc
+#iwconfig wifi0 key [1] restricted
+
+iwconfig eth1 channel 3
+iwconfig eth1 mode ad-hoc
+iwconfig eth1 key [1] restricted
+
+echo "waiting 3 seconds for card to settle out..."
+sleep 3
+
+echo "ejecting card and reinserting after 3 seconds..."
+cardctl eject 0
+sleep 3
+cardctl insert 0

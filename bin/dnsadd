@@ -1,0 +1,27 @@
+#!/bin/sh
+
+ARGS=2
+E_WRONGARGS=65
+
+if [ $# -ne "$ARGS" ] # Check for proper no. of command line args.
+then
+    echo "===================================================="
+    echo " -- add a ddns record in domain suzhou --           "
+    echo "Usage: `basename $0` domain_name domain_ip          "
+    echo "e.g.                                                "       
+    echo "`basename $0` fog 172.31.12.169 =>add fog.suzhou     "
+    echo
+    echo "                                    Fog 2002-11-15  "
+    echo "===================================================="
+    exit $E_WRONGARGS
+fi
+
+dname=$1    #domain name
+dip=$2      #domain ip
+
+nsupdate <<**
+update add $dname.suzhou 600 A $dip
+send
+quit
+**
+echo "[$dname.suzhou] <-> [$dip]"

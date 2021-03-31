@@ -1,0 +1,148 @@
+#!/bin/sh
+#
+# iwconfig ${wireless_inf} essid "Meeting_Room" key "6666688888"
+#
+
+CHOICE=$1
+
+#Q=echo
+TRUE=1
+FALSE=0
+
+lanIp1="192.168.0.252"
+lanIp2="192.168.1.252"
+#lanGwMac1="00:C0:02:00:00:21" # local test board 
+lanGwMac1="00:C0:02:00:02:06" # voip board
+lanGwMac2="00:c0:02:00:00:21"
+
+: ${rft630GW:="192.168.0.1"}
+: ${ifaceWire:="eth0"}
+: ${ifaceWlan:="wlan0"}
+
+ipWire=`/sbin/ifconfig ${ifaceWire} | grep -A 1  "${ifaceWire}" | grep -i "inet addr" | awk -F ":" '{print $2}' | awk '{print $1}'`;
+ipWlan=`/sbin/ifconfig ${ifaceWlan} | grep -A 1  "${ifaceWlan}" | grep -i "inet addr" | awk -F ":" '{print $2}' | awk '{print $1}'`;
+
+# Default route interface
+defIface=`route -n -v|grep "^0.0.0.0"|sed 's/ \+/ /g'|cut -f 8 -d " "`
+
+case $CHOICE in
+
+    0) 	echo "HOME Wireless LAN + SerComm VPN"
+
+        wlanGW=`route -n -v|grep "^0.0.0.0.*${ifaceWlan}$"|sed 's/ \+/ /g'|cut -f 2 -d " "`
+        : ${wlanGW:="192.168.1.1"}
+
+        ifaceTuns=(`ifconfig|grep "^tun"|cut -f 1 -d " "`)
+        lastIdx=$((${#ifaceTuns[@]}-1))
+        ifaceVpn=${ifaceTuns[$lastIdx]}
+
+        ${Q} route del default dev ${ifaceVpn}
+        ${Q} route add default gw ${wlanGW}
+        ${Q} route add -net 172.0.0.0 netmask 255.0.0.0 dev ${ifaceVpn}
+
+        ;;
+
+    1) 	echo "(eth0)RD + (eth0:1)RFT630 NAT LAN"
+
+        if [ "$ipWire" = "" ]; then
+            ${Q} dhclient $ifaceWire
+        fi
+
+        ethGW=`route -n -v|grep "^0.0.0.0.*${ifaceWire}$"|grep -v "${rft630GW}"|sed 's/ \+/ /g'|cut -f 2 -d " "`
+        if [ "$ethGW" = "" ]; then
+            echo "Error: there is a wrong dhcp server on network!"
+            exit
+        fi
+        ${Q} ifconfig ${ifaceWire}:1 ${lanIp1}
+        ${Q} ifconfig ${ifaceWire}:2 ${lanIp2}
+
+        ${Q} route del default gw ${ethGW}
+        ${Q} route add default gw ${rft630GW}
+        ${Q} route add -net 172.0.0.0 netmask 255.0.0.0 gw ${ethGW}
+        ${Q} route add -net 172.21.67.0 netmask 255.255.255.0 gw 172.21.8.200
+        ${Q} route add -net 172.21.16.229 netmask 255.255.255.255 gw 192.168.0.1
+
+        ${Q} arp -s 192.168.0.1 ${lanGwMac1}
+        ${Q} arp -s 192.168.1.254 ${lanGwMac2}
+        ;;
+
+    2) 	echo "(eth0)RD + (eth0:1)RFT630 NAT LAN + (wlan0)PA LAB/RD LAB"
+
+        if [ "$ipWire" = "" ]; then
+            ${Q} dhclient $ifaceWire
+        fi
+        if [ "$ipWlan" = "" ]; then
+            ${Q} dhclient $ifaceWlan
+        fi
+
+        ethGW=`route -n -v|grep "^0.0.0.0.*${ifaceWire}$"|grep -v "${rft630GW}"|sed 's/ \+/ /g'|cut -f 2 -d " "`
+        if [ "$ethGW" = "" ]; then
+            echo "Error: there is a wrong dhcp server on network!"
+            exit
+        fi
+        wlanGW=`route -n -v|grep "^0.0.0.0.*${ifaceWlan}$"|sed 's/ \+/ /g'|cut -f 2 -d " "`
+        : ${wlanGW:="172.21.98.217"}
+        for iface in $defIface;do
+            if [ "$iface" != "$ifaceWire" ];then
+                ${Q} route del default dev $iface
+            else
+                wireRouteExist=${TRUE}
+            fi
+        done
+        if [ ! $wireRouteExist ];then
+            ${Q} dhclient $ifaceWire
+        fi
+
+        ipWire=`/sbin/ifconfig ${ifaceWire} | grep -A 1  "${ifaceWire}" | grep -i "inet addr" | awk -F ":" '{print $2}' | awk '{print $1}'`;
+        ${Q} ifconfig ${ifaceWire}:1 ${lanIp}
+        ${Q} route del default gw ${ethGW}
+        ${Q} route add default gw ${rft630GW}
+        ${Q} route add -net 172.0.0.0 netmask 255.0.0.0 gw ${ethGW}
+        ${Q} route add -net 172.21.16.0 netmask 255.255.255.0 gw ${wlanGW}
+        ${Q} route add -net 172.21.98.0 netmask 255.255.255.0 gw ${wlanGW}
+
+        ${Q} arp -s 192.168.0.1 ${lanGwMac}
+        ;;
+
+    3) 	echo "(eth0)RD + (wlan0)PA LAB/RD LAB"
+
+        if [ "$ipWire" = "" ]; then
+            ${Q} dhclient $ifaceWire
+        fi
+        if [ "$ipWlan" = "" ]; then
+            ${Q} dhclient $ifaceWlan
+        fi
+
+        wlanGW=`route -n -v|grep "^0.0.0.0.*${ifaceWlan}$"|sed 's/ \+/ /g'|cut -f 2 -d " "`
+        : ${wlanGW:="172.21.98.217"}
+        for iface in $defIface;do
+            if [ "$iface" != "$ifaceWire" ];then
+                ${Q} route del default dev $iface
+            else
+                wireRouteExist=${TRUE}
+            fi
+        done
+        if [ ! $wireRouteExist ];then
+            ${Q} dhclient $ifaceWire
+        fi
+
+        ${Q} ifconfig ${ifaceWire}:1 ${lanIp}
+        #${Q} route add -net 172.0.0.0 netmask 255.0.0.0 gw ${wlanGW}
+        ${Q} route add -net 172.21.16.0 netmask 255.255.255.0 gw ${wlanGW}
+        ${Q} route add -net 172.21.98.0 netmask 255.255.255.0 gw ${wlanGW}
+
+        ;;
+
+    4) 	echo "ZJG HOME Wireless LAN"
+
+        #${Q} iwconfig $ifaceWlan essid NETGEAR68
+        #${Q} iwconfig $ifaceWlan essid NETGEAR68 key 37DD5A0741
+        #${Q} dhclient $ifaceWlan
+        ;;
+
+    *)
+        echo "0. (wlan0)HOME Wireless LAN + SerComm VPN"
+        echo "1. (eth0)RD + (eth0:1)RFT630 NAT LAN"
+        echo "2. (eth0)RD + (eth0:1)RFT630 NAT LAN + (wlan0)PA LAB/RD LAB"
+        ;;
+esac

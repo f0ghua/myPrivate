@@ -1,0 +1,5 @@
+#!/bin/bash
+grep -i "$1" /home/fog/private/data/doc/phone_20050901.txt
+if [[ "$?" != "0" ]];then
+grep -i "$1" /home/fog/private/data/doc/phone.txt
+fi

@@ -1,0 +1,158 @@
+#!/bin/bash
+#  options 
+#  -d  directory       		    default is "."
+#  -n  name            		    default is "*"
+#  -R  recursion       		    default is off
+#  -l|u  lower case|upper case      default is to lower case
+#  -t   only change directory name|only change directory name|both   default is also change directory name
+#  Usage:transfer [-d directory1 directory2 ...] [-n *.c *.h ...] [-t d|f|b]
+# 								[-R] [-l|u] 
+DIRECTORYS="."
+MYFILENAMES="*"
+RECURSION=0             #default is off
+CASE=0                  #default to lower case
+ALSO="f"                #default is both change
+UNIXFORMAT=0            #default is not change to unix format
+echoUsage(){
+    echo -e "\033[44;38m"
+    echo "-------------------------------------------------------------"
+    echo "Usage:transfilename [options]                                "
+    echo "Options:                                                     "
+    echo "[-d directory1 directory2...]                                "
+    echo "    directorys that you want to transfer, default is \".\"   "
+    echo "[-n name1 name 2...]                                         "
+    echo "    wildcards of filenames, default is \"*\"                 "
+    echo "[-c l|u]      convert upper case to lower case|              "
+    echo "              convert lower case to upper case               "
+    echo "              default is change to lower case		       "
+    echo "[-t d|f|b]  only change directory's name |                   "
+    echo "            only change filename         |                   "
+    echo "            both directory and file name                     "
+    echo "            default is only change filename                  "
+    echo "[-R]        recursion to sub-directorys(default is off)      "
+    echo "[-u]        convert dos format to unix format(default is off)"
+    echo "-------------------------------------------------------------"
+    echo "ex: transfilename -d \"./d1 ./d2\" -n \"*.c *.h\" -t f -c l -Ru"
+    echo -e "\033[40;0m"
+    exit 1;
+}    
+   	
+while getopts d:n:t:c:Ruh OPTION
+do
+case $OPTION 
+in
+    d) DIRECTORYS=$OPTARG;;
+    n) MYFILENAMES=$OPTARG;;
+    t) ALSO=$OPTARG;;
+    R) RECURSION=1;;
+    c) if [ $OPTARG = "l" ]
+       then CASE=0
+       elif [ $OPTARG = "u" ]
+       then CASE=1
+       else echoUsage
+       fi;; 
+    h) echoUsage;;
+    u) UNIXFORMAT=1;;
+    \?) echoUsage;;
+esac
+done
+if [ $ALSO != "f" -a $ALSO != "d" -a $ALSO != "b" ]
+then
+    echoUsage    
+fi
+#echo "directorys="$DIRECTORYS
+#echo "filenames=""$MYFILENAMES"
+#echo "recursion="$RECURSION
+#echo "case="$CASE
+#echo "also="$ALSO
+#echo "unixformat="$UNIXFORMAT
+#sleep 2
+if [ "$MYFILENAMES" = "*" ] ; then
+    FILEISALL=1;
+else
+    FILEISALL=0;
+fi
+for DIRECTORY in $DIRECTORYS
+do
+    for FILENAME in $MYFILENAMES
+    do
+#       echo $DIRECTORY
+#       echo "$FILENAME"
+#       sleep 1
+    if [ $ALSO = "f" -o $ALSO = "b" ] ; then
+	if [ $RECURSION -eq 1 ] ; then
+	    if [ $FILEISALL -eq 1 ] ; then
+		FILES=`find $DIRECTORY -name "*"  -type f`  #convert file first
+	    else
+		FILES=`find $DIRECTORY -name "$FILENAME"  -type f`  #convert file first
+	    fi
+	else
+	    if [ $FILEISALL -eq 1 ] ; then
+		FILES=`find $DIRECTORY -name "*"  -type f -maxdepth 1`  #convert file first
+	    else
+		FILES=`find $DIRECTORY -name "$FILENAME"  -type f -maxdepth 1`  #convert file first
+	    fi
+	fi
+        for FILE in $FILES 
+        do
+#	    echo $FILE
+            DIR=`dirname $FILE`
+#           echo $DIR
+            if [ $RECURSION -eq 0 -a $DIR != $DIRECTORY ] ; then
+		continue
+            fi		
+	    if [ $CASE -eq 0 ] ; then
+		#convert upper case to lower case
+		BIGBASE=`basename $FILE |tr [A-Z] [a-z]`
+	    else
+		#convert lower case to upper case
+	        BIGBASE=`basename $FILE |tr [a-z] [A-Z]`
+	    fi
+	    if [ $FILE != $DIR/$BIGBASE ] ; then   
+		echo "mv $FILE $DIR/$BIGBASE"
+                mv $FILE $DIR/$BIGBASE
+            fi
+            if [ $UNIXFORMAT -eq 1 ] ; then 
+                dos2unix $DIR/$BIGBASE  
+            fi
+        done
+    fi
+    if [ $ALSO = "d" -o $ALSO = "b" ] ; then
+	if [ $RECURSION -eq 1 ] ; then
+	    if [ $FILEISALL -eq 1 ] ; then
+		FILES=`find $DIRECTORY -name "*"  -type d|sort -r`  #convert file first
+	    else
+		FILES=`find $DIRECTORY -name "$FILENAME"  -type d|sort -r`  #convert file first
+	    fi
+	else
+	    if [ $FILEISALL -eq 1 ] ; then
+		FILES=`find $DIRECTORY -name "*"  -type d -maxdepth 1|sort -r`  #convert file first
+	    else
+		FILES=`find $DIRECTORY -name "$FILENAME"  -type d -maxdepth 1|sort -r`  #convert file first
+	    fi
+	fi
+	for FILE in $FILES
+        do
+	    DIR=`dirname $FILE`
+	    if [ $RECURSION -eq 0 -a $DIR != $DIRECTORY ] ; then
+		continue
+            fi
+	    if [ $CASE -eq 0 ] ; then
+		#convert upper case to lower case
+	        BIGBASE=`basename $FILE |tr [A-Z] [a-z]`
+	    else
+		#convert lower case to upper case
+	        BIGBASE=`basename $FILE |tr [a-z] [A-Z]`
+	    fi
+            if [ $FILE != $DIR/$BIGBASE ] ; then
+		echo "mv $FILE $DIR/$BIGBASE"                    
+                mv $FILE $DIR/$BIGBASE
+            fi
+        done  
+    fi
+    if [ $FILEISALL -eq 1 ]
+    then
+	break;
+    fi
+    done  ###FILENAME
+done  ###DIRECTORY

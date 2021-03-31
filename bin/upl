@@ -1,0 +1,58 @@
+#!/bin/sh
+# ===========================================================
+# This Shell Script is used to get a file by ftp auto
+# Fog - 2002.6.5
+# ---------------------------------------------------------
+# to use this script you should do something first
+# 1.enter your home directory(use command "cd ~")
+# 2.new a file named .netrc(this file will provide usename
+#   and password for script),file content are three lines:
+#     machine   anyserver.anynet.net
+#     login     anonymous
+#     password  mymail@mailserver.net
+# 3.type command "chmod 777 .netrc"
+# 
+# Note:If you want run the script on special time,you can
+# use linux command "at",for example
+#     at 3:00 pm
+#     ftpget
+#     (control - D)
+# ===========================================================
+filename=$1
+#echo "getting file $filename ..."
+##Begin of "here" document
+#ftp <<**
+#open 172.31.12.221
+#bin
+#cd work/fvl328/product
+#get $filename
+#bye
+#**
+##End of the "here" document
+echo "get finished"
+echo "uploading file $filename ..."
+tftp <<**
+connect 192.168.0.1
+bin
+rex 1
+put $filename
+quit
+**
+echo "upload finished"
+#echo "remove $filename"
+#rm -f $filename
+
+## Another solution
+#clear 
+#echo "begin"
+#ftp -n <<_CTL_END
+#open hostname
+#user anonymous fog
+#bin
+#get rd_$`date -d now +%Y%m%d%H`
+#bye
+#_CTL_END
+
+
+
+

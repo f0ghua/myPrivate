@@ -1,0 +1,180 @@
+
+# BASH FUNCTIONS
+
+function tg()
+{
+    _tg_dir=${1}
+    if [ -z "${_tg_dir}" ]; then
+        _tg_dir="."
+    fi
+
+    if [ ! -e "TAGS" ]; then
+	# since xargs doesn't parse args at one time, We need use '-a'
+        find ${_tg_dir} -name "*.[chS]" -o -name "*.cpp"|xargs etags -a -
+    else
+        find ${_tg_dir} -name "*.[chS]" -o -name "*.cpp"|xargs etags -a -
+    fi
+}
+
+function gg()
+{
+    _gg_pattern=${1}
+    if [ -z "${_gg_pattern}" ]; then
+	echo "gg <pattern>"
+    fi
+
+    grep "${_gg_pattern}" -E -H -n --color=auto --exclude-dir ".svn" --exclude "*.svn*" --exclude "*.o.cmd" -R *
+}
+
+function dpkginstall()
+{
+    if [ -z "${1}" -o -z "${2}" ]; then
+	echo "dpkginstall <pkgname> <pkgversion>"
+    fi
+
+    _pkgname=${1}
+    _pkgversion=${2}
+
+    echo ${_pkgname} ${_pkgversion}
+    sudo checkinstall --pkgname=${_pkgname} --pkgversion "${_pkgversion}" --backup=no --default
+}
+
+function fcut2()
+{
+    if [ -z "${1}" -o -z "{2}" -o -z "{3}" ]; then
+        echo "fcut <start time> <end time> <input> [output]"
+	return
+    fi
+    _output="output.mp4"
+    if [ ! -z "${4}" ]; then
+        _output=${4}
+    fi
+
+    echo "$1 $2 $3 $4"
+    ffmpeg -i $3 -vcodec copy -acodec copy -ss $1 -to $2 ${_output}    
+}
+
+
+function fcut1()
+{
+    if [ -z "${1}" -o -z "{2}" -o -z "{3}" ]; then
+        echo "fcut <start time> <duration> <input> [output]"
+	return
+    fi
+    _output="output.mp4"
+    if [ ! -z "${4}" ]; then
+        _output=${4}
+    fi
+
+    echo "$1 $2 $3 $4"
+    ffmpeg -ss $1 -i $3 -t $2 -c:v libx264 -c:a copy -preset ultrafast -crf 0 ${_output}
+    #ffmpeg -ss $1 -t $2 -accurate_seek -i $3 -codec copy -avoid_negative_ts 1 ${_output}
+}
+
+# ------------------------------------------------------------------
+#
+# https://github.com/mooz/percol/
+#
+# You can seach files quickly with 'ff <filename>'
+#
+# Notice that python package 'six' and xclip are needed.
+# you can install with:
+# sudo apt-get install python python-pip
+# pip install six
+# sudo apt-get install xclip
+#
+[ $(uname -s | grep -c CYGWIN) -eq 1 ] && OS_NAME="CYGWIN" || OS_NAME=`uname -s`
+function pclip() {
+    if [ $OS_NAME == CYGWIN ]; then
+        putclip $@;
+    elif [ $OS_NAME == Darwin ]; then
+        pbcopy $@;
+    else
+        if [ -x /usr/bin/xsel ]; then
+            xsel -ib $@;
+        else
+            if [ -x /usr/bin/xclip ]; then
+                xclip -selection c $@;
+            else
+                echo "Neither xsel or xclip is installed!"
+            fi
+        fi
+    fi
+}
+
+# search the file and pop up dialog, then put the full path in clipboard
+function baseff()
+{
+    local fullpath=$*
+    local filename=${fullpath##*/} # remove "/" from the beginning
+    filename=${filename##*./} # remove  ".../" from the beginning
+    # Only the filename without path is needed
+    # filename should be reasonable
+    local cli=`find . -not -iwholename '*/vendor/*' -not -iwholename '*/bower_components/*' -not -iwholename '*/node_modules/*' -not -iwholename '*/target/*' -not -iwholename '*.svn*' -not -iwholename '*.git*' -not -iwholename '*.sass-cache*' -not -iwholename '*.hg*' -type f -path '*'${filename}'*' -print | ~/bin/percol.py`
+    # convert relative path to full path
+    echo $(cd $(dirname $cli); pwd)/$(basename $cli)
+}
+
+function ff()
+{
+    local cli=`baseff $*`
+    #echo ${cli} | sed 's%^'${HOME}'%~%'
+    #echo -n ${cli}  | sed 's%^'${HOME}'%~%' | pclip
+    echo ${cli}
+    echo -n ${cli} | pclip
+}
+
+function cf()
+{
+    local cli=`baseff $*`
+    local p=`cygpath -w $cli`
+    echo ${p}
+    echo -n ${p} | pclip;
+}
+# ------------------------------------------------------------------
+
+# ALIAS
+
+CVS_COMP=172.21.1.234:12121
+CVS_TEAM=172.21.8.200
+FOG_COMP_PC=172.21.8.24
+FOG_HOME_PC=192.168.1.105
+PASS1=sdc.2022
+PASS2=12345678
+
+alias ll='ls -l'
+# list directory
+alias lsd='ls -F | grep /$'
+# chroot with env
+alias su='su -p'
+#alias tg='find . -name "*.[chS]"|etags -'
+alias tg1='find . -name "*.cpp" -or -name "*.h" -or -name "*.cc" -or -name "*.c"|etags -'
+alias cm='find . ! -type d -exec chmod 666 {} \;'
+#alias man="TERMINFO=~/.terminfo/ LESS=C TERM=mostlike PAGER=less man"
+# 172.21.1.234 fog_hua 0x66o0x67
+alias cc="cvs -d :pserver:fog_hua@${CVS_COMP}/home/cvsadmin/sbu-i"
+alias cc2='cvs -d :pserver:cvsadmin@${CVS_COMP}/home/cvsadmin/sbu-ii'
+alias ccc="cvs -d :pserver:fog@${CVS_TEAM}:/data/cvsroot"
+alias cccc="cvs -d :pserver:cvsadmin@${CVS_COMP}/home/cvs_driver"
+alias cvscheck="( cvs -n update -d 2>&1 ) | grep '^[CMUPAR]'"
+alias cvsupdate='( cvs update -d 2>&1 ) | grep '\''^[CMUPAR]'\'''
+alias svndiff='svn diff --diff-cmd=colordiff'
+alias svncheck="svn status -u | grep '^[CMUPAR]'"
+alias svnurl='svn info |grep URL'
+alias cltex='find . -name "*.bbl" -o -name "*.blg" -o -name "*.tex" |xargs rm -f'
+alias win="rdesktop -u 10014 -p ${PASS1} -a 16 -r sound:remote ${FOG_COMP_PC}&"
+alias winf="rdesktop -u 10014 -p ${PASS1} -K -f -a 16 -r sound:local ${FOG_COMP_PC}&"
+alias winx="rdesktop -u fog -p ${PASS2} -a 16 -r sound:remote ${FOG_HOME_PC} &"
+alias winy="rdesktop -u fog -p ${PASS2} -a 16 -K -f -r sound:remote ${FOG_HOME_PC} &"
+alias winz="rdesktop -u fog -p 123456 -K -f -a 16 -r sound:off 172.21.67.8&"
+# to generate patch for cvs
+alias pt="cvs diff -wu $* > $(date +%Y%m%d%H%M).patch"
+alias gdbi="gdb -x ~/.gdbinit.intel"
+alias cline='find ./ -name "*.[ch]" -exec cat {} \; | sed "/^$\|\/\/\|\/\*|\*\//d" | wc -l'
+alias telnet_olt='telnet 172.21.16.229 -l foghua'
+alias unique="awk '! a[\$0]++'"
+alias mktag="sudo nice --adjustment=-10 /opt/soft/slickedit/bin/vsmktags $1"
+alias sz='find . -maxdepth 1 -type "d" -exec du -s {} \;|sort -n'
+#alias fcut='fn() { ffmpeg -ss $1 -i $3 -vcodec copy -acodec copy -to $2 $4;};
+fn'
+alias ec='emacsclient -n'

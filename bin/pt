@@ -1,0 +1,3 @@
+#!/bin/sh
+#mpage -2 -M16tb $1|bg5ps -nps y|lpr
+mpage -2 -m60t20b40l40r $1|bg5ps -nps y|lpr

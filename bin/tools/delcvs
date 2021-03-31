@@ -1,0 +1,9 @@
+#!/bin/sh
+echo "This script will delete all directories named \"cvs\" and \"CVS\" in this directory and all sub directories."
+echo -e "Are you sure(Y/N)?!\c"
+read YES
+[ "$YES" != "y" -a "$YES" != "Y" ] && echo "Exit , do nothing :)" && exit 0
+#delete all cvs type is directory 
+find . -name "cvs" -type d | xargs rm -rf
+find . -name "CVS" -type d | xargs rm -rf
+exit 0

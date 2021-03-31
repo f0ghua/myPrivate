@@ -1,0 +1,2 @@
+#!/bin/bash
+/opt/slickedit-pro2017/bin/vs >/dev/null 2>&1&

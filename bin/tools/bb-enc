@@ -1,0 +1,192 @@
+#!/bin/bash
+S0=$0
+COMM=${S0##*/bb}
+OMFFILENAME="ip505t.omf"
+OMFILES=""
+OMFFILENUM=0
+OMFLOCATON=0
+FILEPRE="ip505t"
+function echoErrMsg(){
+    echo -e "\033[44;38m $1 "
+    echo -e "\033[40;0m\n\c"
+}
+
+if [ $# -ne 0 ]
+then
+    echoErrMsg "This shell program no need any parameters."
+    echoErrMsg "It will bind the files according to the .par file which has the same prefix with the .omf file."
+
+    exit 1
+fi
+#first delete all cps and img file
+rm -f *.img 2>/dev/null
+rm -f *.cps 2>/dev/null
+
+#Check if omf file is exist if not then try to make it.
+OMFFILENUM=0
+OMFILES=`ls *.omf 2>/dev/null`
+for OMFFILENAME in $OMFILES
+do
+    OMFFILENUM=`expr $OMFFILENUM + 1`
+done
+if [ $OMFFILENUM -gt 1 ] ; then
+    echoErrMsg "Sorry , more then one omf files. Please check you makefile!\c"
+    exit 1
+fi
+if [ $OMFFILENUM -eq 0 ] ; then
+    #If directory's name is not product no need to try make.
+    if [ `basename $PWD` != "product" ] ; then
+        echoErrMsg "Sorry , please make sure that OMF file is exist!\c"
+        exit 3
+    fi
+    make 2>/dev/null
+fi
+OMFFILENUM=0
+OMFILES=`ls *.omf 2>/dev/null`
+for OMFFILENAME in $OMFILES
+do
+    OMFFILENUM=`expr $OMFFILENUM + 1`
+done
+##echo "omf file's number is : "$OMFFILENUM
+##sleep 1
+if [ $OMFFILENUM -gt 1 ] ; then
+    echoErrMsg "Sorry , more then one omf files. Please check you makefile!\c"
+    exit 1
+fi
+if [ $OMFFILENUM -eq 0 ] ; then
+    echoErrMsg "Sorry , I can't get OMF file! Please check if your code has some errors!\c"
+    exit 1
+fi
+
+#get file prefix ex: ip505t.omf is ip505t
+
+OMFFILENAME=`ls *.omf 2>/dev/null`
+FILEPRE=${OMFFILENAME%.omf}
+rm -f $FILEPRE.bin
+
+#add by  snow,check the RAM overflow
+mips-objdump -x elf>elf.map
+ENDSTRING=`grep "00000000 _end" elf.map`
+if [ -z "$ENDSTRING" ]
+then
+    #TI CPU , need search "_ebss"
+    ENDSTRING=`grep "00000000 _ebss" elf.map`
+fi
+if [ -z "$ENDSTRING" ]
+then
+    #impossible!!! exit anyway!!
+    echo "impossible!!! exit anyway!!"
+    exit 1
+fi    
+ENDPOINTSTRING=`echo $ENDSTRING|awk '{print $1}'`
+ENDPOINTSTRING=`echo $ENDPOINTSTRING | tr "[:lower:]" "[:upper:]"`
+ENDPOINTSTRING=0x$ENDPOINTSTRING
+TOPRAMSIZE="000000000"
+echo $ENDPOINTSTRING
+##TOPRAMSIZE MUST BE UPPER CHARACTER!!!
+case $FILEPRE in
+# BRECIS    4MB
+"ip505t"|"wgr614"|"ip806t14"|"ip701t"|"ip519t"|"ip816t")			
+    TOPRAMSIZE="080400000"
+;;
+# BRECIS    8MB
+"fr328s"|"fvs328"|"ip706t"|"ip505tntt"|"ip806t")	
+    TOPRAMSIZE="080800000"
+;;
+# BRECIS    16MB
+"fvl328"|"ip505dv"|"ip509dv"|"ip706v"|"ip706tv3")	 
+    TOPRAMSIZE="081000000"
+;;
+# TI	    4MB
+"ip505lt"|"ip706st"|"ip716st"|"me103"|"ap51bt")
+    TOPRAMSIZE="943F8000"
+;;
+# TI	    8MB
+"ip505vt")
+    TOPRAMSIZE="947F8000"
+;;
+*)
+    TOPRAMSIZE="000000000"
+;;
+esac
+TOPRAMSIZE=`echo $TOPRAMSIZE| tr "[:lower:]" "[:upper:]"`
+if [ $TOPRAMSIZE == "000000000" ] ; then
+   echo "No such module name , need update bb file,please contact argon,thanks a lot!"
+   exit 1
+fi 
+isBig=` echo "ibase=16; ${ENDPOINTSTRING#0x} > ${TOPRAMSIZE}"|bc `
+if [ $isBig -gt 0 ] ; then
+    echo "***!***RAM overflow***!***"
+    exit 1
+fi
+
+#Check if par and pid exist
+if [ ! -f $FILEPRE.par -o ! -f $FILEPRE.pid ] ; then
+    echoErrMsg "Sorry,please make sure that you have the par and pid files !\c"
+    exit 6
+fi
+
+#   BRECIS model's par file do not has boot.bin and move.bin's directory 
+#   So we need copy boot.bin and move.bin from mipsdrive
+#   but other model's (ex:TI) par file has directory ,no need copy boot.bin and move.bin
+BOOTBIN=`grep boot.bin $FILEPRE.par`
+SLASHP=`expr index "$BOOTBIN" "/"`
+if [ $SLASHP -eq 0 -o $SLASHP -eq 3 ]   # this means this par file is for BRECIS model.
+                                        # Need check boot.bin and move.bin
+then
+    #Check if boot.bin is exist if not then try to get it.
+    
+    if [ ! -f boot.bin ] ; then
+        #If directory's name is not product no need to try make.
+        if [ `basename $PWD` != "product" ] ; then
+            echoErrMsg "Sorry , please make sure that boot.bin is exist!\c"
+            exit 4
+        fi
+        echo "copy boot.bin ..."
+        cp ../mipsdriver/protect/boot.bin . 2>/dev/null
+    fi
+    if [ ! -f boot.bin ] ; then
+        echoErrMsg "Sorry , please make sure that boot.bin is exist!\c"
+        exit 4
+    fi
+    
+    #Check if move.bin is exist if not then try to make and get it.
+    if [ -z $COMM ] ; then
+    if [ ! -f move.bin ] ; then
+        #If directory's name is not product no need to try make.
+        if [ `basename $PWD` != "product" ] ; then
+            echoErrMsg "Sorry , please make sure that move.bin is exist!\c"
+            exit 5
+        fi
+        cd ../mipsdriver/move            2>/dev/null
+    #   make it anyway for we should make sure that this move.bin is the lastest. (Fix the bug just like sailor change dirver).
+    #    if [ ! -f move.bin ] ; then
+         echo "make move.bin ..."
+         make                         2>/dev/null
+    #    fi
+        cd ../../product                 2>/dev/null
+        cp ../mipsdriver/move/move.bin . 2>/dev/null
+    fi
+    if [ ! -f move.bin ] ; then
+        echoErrMsg "Sorry , please make sure that move.bin is exist!\c"
+        exit 5
+    fi
+    fi
+fi
+
+##echo "omf file name is : "$OMFFILENAME
+##sleep 2
+if [ -z $COMM ] ; then
+lzhuf e $OMFFILENAME $FILEPRE.cps
+fi
+mipsBind $FILEPRE.par $FILEPRE.bin
+if [ $? -gt 0 ] ; then
+    exit 1
+fi
+rm *.img 2>/dev/null
+mipsCompress $FILEPRE.bin sErCoMm EraseAll
+mv $FILEPRE.img $FILEPRE"_a.img"
+mipsCompress $FILEPRE.bin
+encrypt $FILEPRE.img
+encrypt $FILEPRE"_a.img"
+

@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "pm-suspend"|at $1

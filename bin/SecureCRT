@@ -1,0 +1,4 @@
+#!/bin/sh
+export PATH=/home/fog/soft/tool/secureCRT/scrt-6.7.3:$PATH
+rm ~/.vandyke/Config/SecureCRT_eval.lic
+SecureCRT > /dev/null 2>&1 &

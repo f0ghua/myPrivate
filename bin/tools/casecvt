@@ -1,0 +1,103 @@
+#!/bin/sh
+# =========================================================
+# This shell script convert all files in a directory
+# to lower/upper case name
+# =========================================================
+#====================================================
+usage()
+{
+  echo "===================================================="
+  echo " --convert filename to lower/upper case--           "
+  echo " Usage : `basename $0` -[l|u] -[d] dir -[t] type    "
+  echo " [-d] - specify the directory                       "
+  echo " [-l] - convert to lower case                       "
+  echo " [-u] - convert to upper case                       "
+  echo " [-t] - specify the file type                       "
+  echo "                                    Fog 2002-4-15   "
+  echo "===================================================="
+  exit 1
+}
+#=====================================================
+u2l()
+{
+  T_PATH=`dirname $files`
+  OLDNAME=`basename $files`
+  NEWNAME=`echo $OLDNAME | tr "[:upper:]" "[:lower:]"`
+  if [ "$OLDNAME" != "$NEWNAME" ]
+  then
+    echo "convert $OLDNAME to $NEWNAME..."
+    mv "$1" "$T_PATH/$NEWNAME"
+  else
+    echo "precessing $1..."
+  fi
+}
+#=====================================================
+l2u()
+{
+  T_PATH=`dirname $files`
+  OLDNAME=`basename $files`
+  NEWNAME=`echo $OLDNAME | tr "[:lower:]" "[:upper:]"`
+  if [ "$OLDNAME" != "$NEWNAME" ]
+  then
+    echo "convert $OLDNAME to $NEWNAME..."
+    mv "$1" "$T_PATH/$NEWNAME"
+  else
+    echo "precessing $1..."
+  fi
+}
+
+#========================main===========================
+#set the default func and type
+FUNC="u2l"
+TYPE="."
+
+if [ $# -eq 0 ]
+then
+  #no parameters passed!
+  usage
+fi
+
+#get the parameters and set the variables
+while [ $# -gt 0 ]
+do
+  case $1 in
+  -u|-U) #echo "-u option specified"
+         FUNC="l2u"
+         shift
+         ;;
+  -l|-L) #echo "-l option specified"
+         FUNC="u2l"
+         shift
+         ;;
+  -d|-D) #echo "-d option specified"
+         DIR="$2"
+         shift
+         ;;
+  -t|-T) #echo "-t option specified"
+         TYPE="$2"
+         shift
+         ;;
+  *)     #echo "all"
+         shift
+          ;;
+  esac
+done
+
+#check the dir
+if [ "$DIR" = "" ]
+then
+  echo you should use -d to specify a directory!
+  usage
+fi
+
+if [ ! -d $DIR ]
+then
+  echo "sorry,$DIR is not a directory"
+  usage
+fi
+
+#do convert
+for files in `find $DIR -type f -name "$TYPE"`
+  do
+    $FUNC $files
+done
