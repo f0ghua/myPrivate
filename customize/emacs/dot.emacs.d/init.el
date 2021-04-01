@@ -28,6 +28,11 @@
 ;; Set to t if you want to use ycmd-goto in C/C++/Rust mode
 (defvar my:use-ycmd-goto nil)
 
+;; Extra plugins and config files are stored here
+(if (not (file-directory-p "~/.emacs.d/plugins/"))
+    (make-directory "~/.emacs.d/plugins/"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/plugins"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,6 +81,8 @@
 ;;       '(("myelpa" . "~/.emacs.d/myelpa/")
 ;;         ("org" . "~/.emacs.d/myelpa/")
 ;;         ))
+
+(setq package-check-signature nil)
 
 ;; Disable package initialize after us.  We either initialize it
 ;; anyway in case of interpreted .emacs, or we don't want slow
@@ -134,8 +141,12 @@
   :ensure org
   :pin org)
 
-(require 'org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(use-package org-bullets
+  :commands org-bullets-mode
+  :init
+  (add-hook 'org-mode-hook 'org-bullets-mode)
+  (setq org-bullets-bullet-list '("◉" "○" "●" "►" "•"))
+  )
 
 ;; Support converting org to confluence format
 (require 'ox-confluence)
@@ -167,16 +178,14 @@
                     file-name-handler-alist file-name-handler-alist-old
                     )))
 
-;; Extra plugins and config files are stored here
-(if (not (file-directory-p "~/.emacs.d/plugins/"))
-    (make-directory "~/.emacs.d/plugins/"))
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/plugins"))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Tweaks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(load-theme 'zenburn t)
+(use-package zenburn-theme
+  :ensure t
+  :config
+  (load-theme 'zenburn t))
 
 ;; turn on highlight matching brackets when cursor is on one
 (show-paren-mode t)
