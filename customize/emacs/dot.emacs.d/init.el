@@ -137,6 +137,9 @@
 (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
+;; Support converting org to confluence format
+(require 'ox-confluence)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -770,9 +773,14 @@ Justify when called with prefix arg."
     )
   )
 
-(require 'ox-confluence)
+;; On windows, counsel-rg not works without following settings
+(ivy-prescient-mode 1) ;; First, ivy-prescient-re-builder is assigned for counsel-rg.
+(setf (alist-get 'counsel-rg ivy-re-builders-alist) #'ivy--regex-plus) ;; Second, overwrite ivy-prescient-re-builder by ivy--regex-plus
 
-;; auto added by emacs
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Auto added by emacs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
