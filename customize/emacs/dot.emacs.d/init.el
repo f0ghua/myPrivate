@@ -72,7 +72,10 @@
         ))
 
 ;; use following line to replace for no internet environment
-;; (setq package-archives '(("myelpa" . "~/.emacs.d/myelpa/")))
+;; (setq package-archives
+;;       '(("myelpa" . "~/.emacs.d/myelpa/")
+;;         ("org" . "~/.emacs.d/myelpa/")
+;;         ))
 
 ;; Disable package initialize after us.  We either initialize it
 ;; anyway in case of interpreted .emacs, or we don't want slow
@@ -125,6 +128,16 @@
   :ensure t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; org - make sure use the one from elpa instead of built-in
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package org
+  :ensure org
+  :pin org)
+
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ;; Auto update packages once a week
@@ -159,6 +172,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Tweaks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(load-theme 'zenburn t)
 
 ;; turn on highlight matching brackets when cursor is on one
 (show-paren-mode t)
@@ -755,6 +770,8 @@ Justify when called with prefix arg."
     )
   )
 
+(require 'ox-confluence)
+
 ;; auto added by emacs
 
 (custom-set-variables
@@ -762,9 +779,10 @@ Justify when called with prefix arg."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-export-backends (quote (ascii html icalendar latex odt confluence)))
  '(package-selected-packages
    (quote
-    (org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
+    (org-bullets zenburn-theme org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
