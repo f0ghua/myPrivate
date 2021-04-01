@@ -34,35 +34,6 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/plugins"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Appearance
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; I don't care to see the splash screen
-(setq inhibit-splash-screen t)
-
-;; Hide the scroll bar
-(scroll-bar-mode -1)
-;; Make mode bar small
-(set-face-attribute 'mode-line nil  :height my:line-font-size)
-;; Set the header bar font
-(set-face-attribute 'header-line nil  :height my:line-font-size)
-;; Set default window size and position
-;; (setq default-frame-alist
-;;       '((top . 0) (left . 0) ;; position
-;;         (width . 110) (height . 70) ;; size
-;;         ))
-
-;; Enable line numbers on the LHS
-(global-linum-mode t)
-
-;; Set the font to size 9 (90/10).
-;; (set-face-attribute 'default nil :height my:font-size)
-
-(setq-default indicate-empty-lines t)
-(when (not indicate-empty-lines)
-  (toggle-indicate-empty-lines))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set packages to install
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; (setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
@@ -129,6 +100,48 @@
   :commands use-package-autoload-keymap)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Appearance
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(use-package zenburn-theme
+  :ensure t
+  :config
+  (load-theme 'zenburn t))
+
+;; I find that the default highlight colour in the dark zenburn
+;; theme can be hard to see, so change highlight colour
+(set-face-attribute 'region t :background "#164040")
+
+;; don't highlight the end of long lines longer than 80 characters
+(setq whitespace-line-column 99999)
+
+;; I don't care to see the splash screen
+(setq inhibit-splash-screen t)
+
+;; Hide the scroll bar
+(scroll-bar-mode -1)
+;; Make mode bar small
+(set-face-attribute 'mode-line nil  :height my:line-font-size)
+;; Set the header bar font
+(set-face-attribute 'header-line nil  :height my:line-font-size)
+;; Set default window size and position
+;; (setq default-frame-alist
+;;       '((top . 0) (left . 0) ;; position
+;;         (width . 110) (height . 70) ;; size
+;;         ))
+
+;; Enable line numbers on the LHS
+(global-linum-mode t)
+
+;; Set the font to size 9 (90/10).
+;; (set-face-attribute 'default nil :height my:font-size)
+
+(setq-default indicate-empty-lines t)
+(when (not indicate-empty-lines)
+  (toggle-indicate-empty-lines))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; async - library for async/thread processing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package async
@@ -141,15 +154,62 @@
   :ensure org
   :pin org)
 
-(use-package org-bullets
-  :commands org-bullets-mode
-  :init
-  (add-hook 'org-mode-hook 'org-bullets-mode)
-  (setq org-bullets-bullet-list '("◉" "○" "●" "►" "•"))
-  )
+;; (use-package org-bullets
+;;   :commands org-bullets-mode
+;;   :init
+;;   (add-hook 'org-mode-hook 'org-bullets-mode)
+;;   (setq org-bullets-bullet-list '("◉" "○" "●" "►" "•"))
+;;   )
 
 ;; Support converting org to confluence format
 (require 'ox-confluence)
+
+;; set org mode src highlighting by default
+(setq org-src-fontify-natively t)
+;; set maximum indentation for description lists
+(setq org-list-description-max-indent 5)
+;; prevent demoting heading also shifting text inside sections
+(setq org-adapt-indentation nil)
+
+(defun fill-region-paragraphs (b e &optional justify)
+  "Fill region between b and e like `fill-paragraph' for each
+paragraph in region instead of `fill-region' which is implied by
+the original version of `fill-paragraph'.  Justify when called
+with prefix arg."
+  (interactive "r\nP")
+  (save-excursion
+    (goto-char b)
+    (while (< (point) e)
+      (fill-paragraph justify)
+      (forward-paragraph)
+      )))
+
+;; TODO
+;; set key for agenda
+(global-set-key (kbd "C-c a") 'org-agenda)
+
+;;file to save todo items
+(setq org-agenda-files (quote ("~/.emacs.d/todo.org")))
+
+;;set priority range from A to C with default A
+(setq org-highest-priority ?A)
+(setq org-lowest-priority ?C)
+(setq org-default-priority ?A)
+
+;;set colours for priorities
+(setq org-priority-faces '((?A . (:foreground "#F0DFAF" :weight bold))
+                           (?B . (:foreground "LightSteelBlue"))
+                           (?C . (:foreground "OliveDrab"))))
+
+;;open agenda in current window
+(setq org-agenda-window-setup (quote current-window))
+
+;;capture todo items using C-c c t
+(define-key global-map (kbd "C-c c") 'org-capture)
+(setq org-capture-templates
+      '(("t" "todo" entry (file+headline "~/.emacs.d/todo.org" "Tasks")
+         "* TODO [#A] %?")))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
@@ -182,11 +242,6 @@
 ;; General Tweaks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-package zenburn-theme
-  :ensure t
-  :config
-  (load-theme 'zenburn t))
-
 ;; turn on highlight matching brackets when cursor is on one
 (show-paren-mode t)
 ;; Overwrite region selected
@@ -204,9 +259,13 @@
 ;; Disable the toolbar at the top since it's useless
 (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
 
+;; GNU coding standards requests a width of 79 characters, while most
+;; people use a width of 80. Emacs default use a value of 70.
+;;
+;; https://www.gnu.org/prep/standards/standards.html#Formatting
 ;; Auto-wrap at 80 characters
+;; (setq-default fill-column 80)
 (setq-default auto-fill-function 'do-auto-fill)
-(setq-default fill-column 80)
 (turn-on-auto-fill)
 ;; Disable auto-fill-mode in programming mode
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
@@ -235,32 +294,18 @@
                '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
                   1 font-lock-warning-face t))))))
 
+;; Delete trailing spaces before saving a file
 (add-hook 'before-save-hook 'my-prog-nuke-trailing-whitespace)
 (defun my-prog-nuke-trailing-whitespace ()
   (when (derived-mode-p 'prog-mode)
     (delete-trailing-whitespace)))
 
 ;; Prevent from new line indent when press RET
-(setq electric-indent-mode nil) ; globally
-
-;; set org mode src highlighting by default
-(setq org-src-fontify-natively t)
-
-(defun fill-region-paragraphs (b e &optional justify)
-  "Fill region between b and e like `fill-paragraph' for each paragraph in region
-instead of `fill-region' which is implied by the original version of `fill-paragraph'.
-Justify when called with prefix arg."
-  (interactive "r\nP")
-  (save-excursion
-    (goto-char b)
-    (while (< (point) e)
-      (fill-paragraph justify)
-      (forward-paragraph)
-      )))
-(global-set-key (kbd "C-c f") 'fill-region-paragraphs)
+;; (setq electric-indent-mode nil) ; globally
 
 ;; Global Keyboard Shortcuts
 ;; Set help to C-?
+(global-set-key (kbd "C-c f") 'fill-region-paragraphs)
 (global-set-key (kbd "<f11>") 'beginning-of-buffer)
 (global-set-key (kbd "C-x C-b") 'ivy-switch-buffer)
 
