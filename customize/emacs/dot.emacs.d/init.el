@@ -150,8 +150,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; org - make sure use the one from elpa instead of built-in
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; remove references to older org in path
+(setq load-path
+      (cl-remove-if (lambda (x) (string-match-p "org$" x)) load-path))
+
 (use-package org
-  :ensure org
+  :ensure org-plus-contrib
   :pin org)
 
 ;; (use-package org-bullets
@@ -170,6 +175,10 @@
 (setq org-list-description-max-indent 5)
 ;; prevent demoting heading also shifting text inside sections
 (setq org-adapt-indentation nil)
+(setq org-src-strip-leading-and-trailing-blank-lines t)
+(setq org-src-preserve-indentation t)
+(setq org-src-tab-acts-natively t)
+
 
 (defun fill-region-paragraphs (b e &optional justify)
   "Fill region between b and e like `fill-paragraph' for each
