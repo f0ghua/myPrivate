@@ -221,6 +221,17 @@ with prefix arg."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; markdown
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package markdown-mode
+  :ensure t
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ;; Auto update packages once a week
@@ -311,6 +322,16 @@ with prefix arg."
 
 ;; Prevent from new line indent when press RET
 ;; (setq electric-indent-mode nil) ; globally
+
+;; Set chrome as default brower
+;; 1. set chrome as default browser for windows
+;; 2. create chrome.bat in your path, with content: start "" %1
+(if (eq system-type 'windows-nt)
+  ;; something for windows if true
+  (setq browse-url-chrome-program "chrome")
+  (setq browse-url-browser-function 'browse-url-chrome)
+)
+
 
 ;; Global Keyboard Shortcuts
 ;; Set help to C-?
@@ -853,7 +874,7 @@ with prefix arg."
  '(org-export-backends (quote (ascii html icalendar latex odt confluence)))
  '(package-selected-packages
    (quote
-    (org-bullets zenburn-theme org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
+    (markdown-mode org-bullets zenburn-theme org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
