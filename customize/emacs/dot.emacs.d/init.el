@@ -121,25 +121,114 @@
 
 ;; Hide the scroll bar
 (scroll-bar-mode -1)
-;; Make mode bar small
-(set-face-attribute 'mode-line nil  :height my:line-font-size)
-;; Set the header bar font
-(set-face-attribute 'header-line nil  :height my:line-font-size)
-;; Set default window size and position
-;; (setq default-frame-alist
-;;       '((top . 0) (left . 0) ;; position
-;;         (width . 110) (height . 70) ;; size
-;;         ))
 
 ;; Enable line numbers on the LHS
 (global-linum-mode t)
 
-;; Set the font to size 9 (90/10).
-;; (set-face-attribute 'default nil :height my:font-size)
+
 
 (setq-default indicate-empty-lines t)
 (when (not indicate-empty-lines)
   (toggle-indicate-empty-lines))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Appearance - Charset and Font
+;;
+;; C-x C-+ increase the font size
+;; C-x C-- decrease the font size
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; Make mode bar small
+(set-face-attribute 'mode-line nil  :height my:line-font-size)
+;; Set the header bar font
+(set-face-attribute 'header-line nil  :height my:line-font-size)
+
+
+;; Set the font to size 9 (90/10).
+;; (set-face-attribute 'default nil :height my:font-size)
+
+(defun qiang-font-existsp (font)
+  (if (null (x-list-fonts font))
+      nil
+    t))
+
+(defvar zh-font-list '("PingFangSC-Regular" "Hiragino Sans GB" "Microsoft Yahei" "Source Han Sans Normal" "STHeiti"))
+(defvar en-font-list '("DejaVu Sans Mono" "Monaco" "Consolas" "Monospace" "Courier New"))
+
+(defun qiang-make-font-string (font-name font-size)
+  (if (and (stringp font-size)
+           (equal ":" (string (elt font-size 0))))
+      (format "%s%s" font-name font-size)
+    (format "%s %s" font-name font-size)))
+
+(defun qiang-set-font (english-fonts
+                       english-font-size
+                       chinese-fonts
+                       &optional chinese-font-scale)
+
+  (setq chinese-font-scale (or chinese-font-scale 1.2))
+
+  (setq face-font-rescale-alist
+        (cl-loop for x in zh-font-list
+              collect (cons x chinese-font-scale)))
+
+  "english-font-size could be set to \":pixelsize=18\" or a integer.
+If set/leave chinese-font-scale to nil, it will follow english-font-size"
+
+  (require 'cl)                         ; for find if
+  (let ((en-font (qiang-make-font-string
+                  (find-if #'qiang-font-existsp english-fonts)
+                  english-font-size))
+        (zh-font (font-spec :family (find-if #'qiang-font-existsp chinese-fonts))))
+
+    ;; Set the default English font
+    (message "Set English Font to %s" en-font)
+    (set-face-attribute 'default nil :font en-font)
+
+    ;; Set Chinese font
+    ;; Do not use 'unicode charset, it will cause the English font setting invalid
+    (message "Set Chinese Font to %s" zh-font)
+    (dolist (charset '(kana han symbol cjk-misc bopomofo))
+      (set-fontset-font (frame-parameter nil 'font)
+                        charset zh-font))))
+
+(qiang-set-font en-font-list (/ my:font-size 10) zh-font-list)
+
+;; Set default window size and position by fixed value
+;; (setq default-frame-alist
+;;       '((top . 0) (left . 0) ;; position
+;;         (width . 95) (height . 40) ;; size
+;;         ))
+
+;; Set initial frame size and position by percentage
+(defun my/set-initial-frame ()
+  (let* ((base-factor-height 0.70)
+         (base-factor-width 0.45)
+         (a-width (* (display-pixel-width) base-factor-width))
+         (a-height (* (display-pixel-height) base-factor-height))
+         (a-left (truncate (/ (- (display-pixel-width) a-width) 2)))
+         (a-top (truncate (/ (- (display-pixel-height) a-height) 2))))
+    (set-frame-position (selected-frame) a-left a-top)
+    (set-frame-size (selected-frame) (truncate a-width)  (truncate a-height) t)))
+(setq frame-resize-pixelwise t)
+(my/set-initial-frame)
+
+;; GNU coding standards requests a width of 79 characters, while most
+;; people use a width of 80. Emacs default use a value of 70.
+;;
+;; https://www.gnu.org/prep/standards/standards.html#Formatting
+;; Auto-wrap at 80 characters
+(setq-default fill-column 80)
+(setq-default auto-fill-function 'do-auto-fill)
+(turn-on-auto-fill)
+;; Disable auto-fill-mode in programming mode
+(add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; async - library for async/thread processing
@@ -232,6 +321,13 @@ with prefix arg."
   :init (setq markdown-command "multimarkdown"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; rfc-mode
+;; use rfc-mode-read to fetch a rfc with index
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package rfc-mode
+  :ensure t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ;; Auto update packages once a week
@@ -278,17 +374,6 @@ with prefix arg."
 (global-hl-line-mode t)
 ;; Disable the toolbar at the top since it's useless
 (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
-
-;; GNU coding standards requests a width of 79 characters, while most
-;; people use a width of 80. Emacs default use a value of 70.
-;;
-;; https://www.gnu.org/prep/standards/standards.html#Formatting
-;; Auto-wrap at 80 characters
-;; (setq-default fill-column 80)
-(setq-default auto-fill-function 'do-auto-fill)
-(turn-on-auto-fill)
-;; Disable auto-fill-mode in programming mode
-(add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
 ;; We don't want to type yes and no all the time so, do y and n
 (defalias 'yes-or-no-p 'y-or-n-p)
