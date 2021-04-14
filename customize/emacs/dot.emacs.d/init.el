@@ -39,18 +39,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set packages to install
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
-                         ("melpa" . "https://melpa.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ))
+;; (setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
+;;                          ("melpa" . "https://melpa.org/packages/")
+;;                          ("gnu" . "http://elpa.gnu.org/packages/")
+;;                          ("org" . "https://orgmode.org/elpa/")
+;;                          ))
 
-;; (setq package-archives
-;;       '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-;;         ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-;; 	("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
-;;         ("org"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-;;         ))
+(setq package-archives
+      '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+        ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+	("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
+        ("org"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+        ))
 
 ;; use following line to replace for no internet environment
 ;; (setq package-archives
