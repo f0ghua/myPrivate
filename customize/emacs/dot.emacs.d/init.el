@@ -14,6 +14,9 @@
 ;; - selectrum https://github.com/raxod502/selectrum emacs26 is needed
 (defvar my:search-backend "ivy")
 
+;; complete function with company
+(defvar my:use-company nil)
+
 ;; Set my:use-prescient to t if you want to use prescient for sorting
 ;;
 ;; https://github.com/raxod502/prescient.el
@@ -36,16 +39,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set packages to install
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
-;;                          ("melpa" . "https://melpa.org/packages/")
-;;                          ("gnu" . "http://elpa.gnu.org/packages/")))
+(setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ))
 
-(setq package-archives
-      '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-        ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-	("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
-        ("org"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-        ))
+;; (setq package-archives
+;;       '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+;;         ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+;; 	("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
+;;         ("org"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+;;         ))
 
 ;; use following line to replace for no internet environment
 ;; (setq package-archives
@@ -412,12 +417,11 @@ with prefix arg."
 ;; Set chrome as default brower
 ;; 1. set chrome as default browser for windows
 ;; 2. create chrome.bat in your path, with content: start "" %1
-(if (eq system-type 'windows-nt)
+(when (eq system-type 'windows-nt)
   ;; something for windows if true
   (setq browse-url-chrome-program "chrome")
   (setq browse-url-browser-function 'browse-url-chrome)
-)
-
+  )
 
 ;; Global Keyboard Shortcuts
 ;; Set help to C-?
@@ -668,7 +672,16 @@ with prefix arg."
   ;;   :ensure t
   ;;   :diminish
   ;;   :after (:all lsp-mode ivy))
+
+  (when (eq system-type 'windows-nt)
+    ;; On windows, counsel-rg not works without following settings
+    ;; First, ivy-prescient-re-builder is assigned for counsel-rg.
+    (ivy-prescient-mode 1)
+    ;; Second, overwrite ivy-prescient-re-builder by ivy--regex-plus
+    (setf (alist-get 'counsel-rg ivy-re-builders-alist) #'ivy--regex-plus)
     )
+
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Selectrum config
@@ -890,45 +903,47 @@ with prefix arg."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set up code completion with company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :hook (prog-mode . global-company-mode)
-  :commands (company-mode company-indent-or-complete-common)
-  :init
-  (setq company-minimum-prefix-length 2
-        company-tooltip-limit 14
-        company-tooltip-align-annotations t
-        company-require-match 'never
-        company-global-modes '(not erc-mode message-mode help-mode gud-mode)
+(when my:use-company
+  (use-package company
+    :ensure t
+    :diminish company-mode
+    :hook (prog-mode . global-company-mode)
+    :commands (company-mode company-indent-or-complete-common)
+    :init
+    (setq company-minimum-prefix-length 2
+          company-tooltip-limit 14
+          company-tooltip-align-annotations t
+          company-require-match 'never
+          company-global-modes '(not erc-mode message-mode help-mode gud-mode)
 
-        ;; These auto-complete the current selection when
-        ;; `company-auto-complete-chars' is typed. This is too magical. We
-        ;; already have the much more explicit RET and TAB.
-        company-auto-complete nil
-        company-auto-complete-chars nil
+          ;; These auto-complete the current selection when
+          ;; `company-auto-complete-chars' is typed. This is too magical. We
+          ;; already have the much more explicit RET and TAB.
+          company-auto-complete nil
+          company-auto-complete-chars nil
 
-        ;; Only search the current buffer for `company-dabbrev' (a backend that
-        ;; suggests text your open buffers). This prevents Company from causing
-        ;; lag once you have a lot of buffers open.
-        company-dabbrev-other-buffers nil
+          ;; Only search the current buffer for `company-dabbrev' (a backend that
+          ;; suggests text your open buffers). This prevents Company from causing
+          ;; lag once you have a lot of buffers open.
+          company-dabbrev-other-buffers nil
 
-        ;; Make `company-dabbrev' fully case-sensitive, to improve UX with
-        ;; domain-specific words with particular casing.
-        company-dabbrev-ignore-case nil
-        company-dabbrev-downcase nil)
+          ;; Make `company-dabbrev' fully case-sensitive, to improve UX with
+          ;; domain-specific words with particular casing.
+          company-dabbrev-ignore-case nil
+          company-dabbrev-downcase nil)
 
-  :config
-  (defvar my:company-explicit-load-files '(company company-capf))
-  (when my:byte-compile-init
-    (dolist (company-file my:company-explicit-load-files)
-      (require company-file)))
-  ;; Zero delay when pressing tab
-  (setq company-idle-delay 0)
-  ;; remove backends for packages that are dead
-  (setq company-backends (delete 'company-eclim company-backends))
-  (setq company-backends (delete 'company-clang company-backends))
-  (setq company-backends (delete 'company-xcode company-backends))
+    :config
+    (defvar my:company-explicit-load-files '(company company-capf))
+    (when my:byte-compile-init
+      (dolist (company-file my:company-explicit-load-files)
+        (require company-file)))
+    ;; Zero delay when pressing tab
+    (setq company-idle-delay 0)
+    ;; remove backends for packages that are dead
+    (setq company-backends (delete 'company-eclim company-backends))
+    (setq company-backends (delete 'company-clang company-backends))
+    (setq company-backends (delete 'company-xcode company-backends))
+    )
   )
 
 ;; Use prescient for sorting results with company:
@@ -943,11 +958,6 @@ with prefix arg."
     )
   )
 
-;; On windows, counsel-rg not works without following settings
-(ivy-prescient-mode 1) ;; First, ivy-prescient-re-builder is assigned for counsel-rg.
-(setf (alist-get 'counsel-rg ivy-re-builders-alist) #'ivy--regex-plus) ;; Second, overwrite ivy-prescient-re-builder by ivy--regex-plus
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto added by emacs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -960,7 +970,7 @@ with prefix arg."
  '(org-export-backends (quote (ascii html icalendar latex odt confluence)))
  '(package-selected-packages
    (quote
-    (markdown-mode org-bullets zenburn-theme org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
+    (projectile markdown-mode org-bullets zenburn-theme org xcscope zzz-to-char yasnippet-snippets yapfify yaml-mode ws-butler writegood-mode winum which-key web-mode vlf visual-regexp-steroids use-package-hydra undo-tree string-inflection spacemacs-theme sourcerer-theme smart-hungry-delete skewer-mode rust-mode rg realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock lua-mode json-mode jetbrains-darcula-theme ivy-prescient hydra hungry-delete google-c-style gitignore-mode git-timemachine ggtags forge flyspell-correct-ivy flycheck-ycmd flycheck-rust flycheck-pyflakes evil-dvorak evil-collection esup elpy ein edit-server doom-themes diminish diff-hl cuda-mode ctrlf counsel-projectile counsel-etags company-ycmd company-prescient cmake-font-lock clang-format beacon autopair auto-package-update auctex async all-the-icons))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
