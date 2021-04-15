@@ -133,12 +133,9 @@
 ;; Enable line numbers on the LHS
 (global-linum-mode t)
 
-
-
 (setq-default indicate-empty-lines t)
 (when (not indicate-empty-lines)
   (toggle-indicate-empty-lines))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance - Charset and Font
@@ -147,10 +144,21 @@
 ;; C-x C-- decrease the font size
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
+;; encode
+(set-charset-priority 'unicode)
+(setq locale-coding-system   'utf-8)
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system        'utf-8)
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+
+;; make 'rg' seaching chinese work in windows system
+(when (eq system-type 'windows-nt)
+  (set-default 'process-coding-system-alist
+               '(("[pP][lL][iI][nN][kK]" gbk-dos . gbk-dos)
+                 ("[cC][mM][dD][pP][rR][oO][xX][yY]" utf-8-dos . gbk-dos)
+                 ("[rR][gG]" utf-8-dos . gbk-dos))))
 
 ;; Make mode bar small
 (set-face-attribute 'mode-line nil  :height my:line-font-size)
