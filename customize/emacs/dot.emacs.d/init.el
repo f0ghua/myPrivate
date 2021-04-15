@@ -3,6 +3,8 @@
 (defvar my:font-size 90)
 (defvar my:line-font-size 90)
 
+(defvar my:use-chinese-font t)
+
 ;; Set my:byte-compile-init to t if you want to compile the init file.
 ;; This will improve startup time by ~2-3 times, but makes getting certain
 ;; packages to load correctly more difficult. Most of the packages work
@@ -156,8 +158,7 @@
 
 ;; Set the font to size 9 (90/10).
 ;; (set-face-attribute 'default nil :height my:font-size)
-(when (eq window-system t)
-
+(when my:use-chinese-font
   (defun qiang-font-existsp (font)
     (if (null (x-list-fonts font))
         nil
@@ -314,6 +315,25 @@ with prefix arg."
       '(("t" "todo" entry (file+headline "~/.emacs.d/todo.org" "Tasks")
          "* TODO [#A] %?")))
 
+;; To support drag/drop images and files. It seems that we need a emacs build
+;; with imagemagick in order to resize inline image.
+;;
+;; C-c C-x C-v toggle inline image show/hide
+;;
+(use-package org-download
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir "images")
+  (org-download-heading-lvl nil)
+  (org-download-timestamp "%Y%m%d-%H%M%S_")
+  (org-image-actual-width 300)
+  ;(org-download-screenshot-method imagemagick/convert)
+  :bind
+  ("C-M-y" . org-download-screenshot)
+  :config
+  (require 'org-download))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; markdown
