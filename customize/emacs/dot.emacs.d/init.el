@@ -3,6 +3,7 @@
 (defvar my:font-size 90)
 (defvar my:line-font-size 90)
 
+;; define this value to nil when doing elpa-mirror
 (defvar my:use-chinese-font t)
 
 ;; Set my:byte-compile-init to t if you want to compile the init file.
