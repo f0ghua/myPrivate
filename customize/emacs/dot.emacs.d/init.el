@@ -337,7 +337,8 @@ with prefix arg."
   (org-download-image-dir "images")
   (org-download-heading-lvl nil)
   (org-download-timestamp "%Y%m%d-%H%M%S_")
-  (org-image-actual-width 300)
+  (org-image-actual-width 500)
+  ;(org-image-actual-width nil)
   ;(org-download-screenshot-method imagemagick/convert)
   :bind
   ("C-M-y" . org-download-screenshot)
@@ -817,6 +818,10 @@ with prefix arg."
 ;; Set the size that a tab CHARACTER is interpreted as
 ;; (unnecessary if there are no tab characters in the file!)
 (setq tab-width 4)
+
+(add-hook 'c-mode-hook
+          (lambda ()
+            (setq tab-width 4)))
 
 ;; We want to be able to see if there is a tab character vs a space.
 ;; global-whitespace-mode allows us to do just that.
