@@ -1,0 +1,7 @@
+* My Emacs config (simple, clean, fast)
+
+#+CAPTION: emacs screen(theme: "leuven")
+#+NAME: screen.png
+[[./screen.png]]
+
+Document: https://www.zhangjiee.com/topic/emacs/index.html

@@ -284,6 +284,9 @@ If set/leave chinese-font-scale to nil, it will follow english-font-size"
 (setq org-src-preserve-indentation t)
 (setq org-src-tab-acts-natively t)
 
+;; set auto linewrap
+;; https://superuser.com/questions/299886/linewrap-in-org-mode-of-emacs/299897
+(setq org-startup-truncated nil)
 
 (defun fill-region-paragraphs (b e &optional justify)
   "Fill region between b and e like `fill-paragraph' for each
