@@ -19,6 +19,15 @@
   ;; set auto linewrap
   ;; https://superuser.com/questions/299886/linewrap-in-org-mode-of-emacs/299897
   (setq org-startup-truncated nil)
+  ;; set org mode src highlighting by default
+  (setq org-src-fontify-natively t)
+  ;; set maximum indentation for description lists
+  (setq org-list-description-max-indent 5)
+  ;; prevent demoting heading also shifting text inside sections
+  (setq org-adapt-indentation nil)
+  (setq org-src-strip-leading-and-trailing-blank-lines t)
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
 
   :config
   ;; GTD setting
@@ -26,6 +35,9 @@
   (setq org-todo-keywords
         '((sequence "TODO(t)" "BLOCK(b)" "|" "DONE(d)" "CANCELD(d)")))
   (setq org-agenda-files '("~/site/org/gtd"))
+
+  ;; Support converting org to confluence format
+  (require 'ox-confluence)
 
   ;; (require 'org-tempo)
 

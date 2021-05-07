@@ -124,9 +124,9 @@ If set/leave chinese-font-scale to nil, it will follow english-font-size"
   ;; use variable-pitch fonts for some headings and titles
   ;; (setq zenburn-use-variable-pitch t)
   ;; scale headings in org-mode
-  (setq zenburn-scale-org-headlines t)
+  ;; (setq zenburn-scale-org-headlines t)
   ;; scale headings in outline-mode
-  (setq zenburn-scale-outline-headlines t)
+  ;; (setq zenburn-scale-outline-headlines t)
   (load-theme 'zenburn t)
   )
 

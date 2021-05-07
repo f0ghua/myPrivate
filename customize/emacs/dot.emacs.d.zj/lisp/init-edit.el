@@ -51,7 +51,9 @@
 		 ("M-s ]" . counsel-git)
 		 ("<f9> x" . counsel-M-x)
 		 ("M-y" . counsel-yank-pop)
-		 ("<f9> f" . counsel-find-file))
+		 ("<f9> f" . counsel-find-file)
+		 ("C-x C-f" . counsel-find-file)
+		 )
   :config
   (setq counsel-ag-base-command "ag --vimgrep -i %s")
   (setq counsel-rg-base-command
