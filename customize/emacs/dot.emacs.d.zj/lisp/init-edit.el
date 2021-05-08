@@ -13,13 +13,6 @@
 ;; Disable auto-fill-mode in programming mode
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
-;; make 'rg' seaching chinese work in windows system
-(when (eq system-type 'windows-nt)
-  (set-default 'process-coding-system-alist
-               '(("[pP][lL][iI][nN][kK]" gbk-dos . gbk-dos)
-                 ("[cC][mM][dD][pP][rR][oO][xX][yY]" utf-8-dos . gbk-dos)
-                 ("[rR][gG]" utf-8-dos . gbk-dos))))
-
 (use-package undo-tree
   :pin gnu
   :ensure t

@@ -88,6 +88,29 @@
   ;; (add-hook 'org-mode-hook #'valign-mode)
   )
 
+;; To support drag/drop images and files. It seems that we need a emacs build
+;; with imagemagick in order to resize inline image.
+;;
+;; C-c C-x C-v toggle inline image show/hide
+;;
+(use-package org-download
+  :pin melpa
+  :ensure t
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir "images")
+  (org-download-heading-lvl nil)
+  (org-download-timestamp "%Y%m%d-%H%M%S_")
+  ;; (org-image-actual-width 500)
+  ;; (org-image-actual-width nil)
+  ;; (org-download-screenshot-method imagemagick/convert)
+  :bind
+  ("C-M-y" . org-download-screenshot)
+  :config
+  (require 'org-download))
+
 ;; blog
 ;; (use-package ox-publish
 ;;   :pin melpa
