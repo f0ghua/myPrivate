@@ -13,6 +13,9 @@
 ;; Disable auto-fill-mode in programming mode
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
+;; insert image as base64 and resize easy
+;; (require 'iimg)
+
 (use-package undo-tree
   :pin gnu
   :ensure t

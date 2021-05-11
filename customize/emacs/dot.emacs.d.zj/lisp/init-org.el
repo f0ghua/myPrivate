@@ -111,6 +111,15 @@
   :config
   (require 'org-download))
 
+;; To make image scroll smooth
+(use-package iscroll
+  :pin melpa
+  :ensure t
+  :after org
+  :init
+  (add-hook 'org-mode-hook (lambda () (iscroll-mode 1)))
+  )
+
 ;; blog
 ;; (use-package ox-publish
 ;;   :pin melpa
