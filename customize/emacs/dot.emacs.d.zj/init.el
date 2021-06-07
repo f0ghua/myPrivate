@@ -49,7 +49,12 @@
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 
-(add-to-list 'load-path "~/.emacs.d/lisp/")
+(add-to-list 'load-path
+             (expand-file-name "lisp"
+                               user-emacs-directory))
+(add-to-list 'load-path
+             (expand-file-name "site-lisp"
+                               user-emacs-directory))
 
 (require 'init-base)
 (require 'init-keybinding)
@@ -68,6 +73,6 @@
 (require 'init-org)
 
 ;; variables configured via the interactive 'customize' interface
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file))

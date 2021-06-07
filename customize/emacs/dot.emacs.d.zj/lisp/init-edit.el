@@ -8,13 +8,15 @@
 ;; https://www.gnu.org/prep/standards/standards.html#Formatting
 ;; Auto-wrap at 80 characters
 (setq-default fill-column 80)
-(setq-default auto-fill-function 'do-auto-fill)
-(turn-on-auto-fill)
+;; (setq-default auto-fill-function 'do-auto-fill)
+;; (turn-on-auto-fill)
 ;; Disable auto-fill-mode in programming mode
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
 ;; insert image as base64 and resize easy
+;; drag and drop conflict with org-download
 ;; (require 'iimg)
+;; (add-hook 'text-mode-hook (lambda () (iimg-enable)))
 
 (use-package undo-tree
   :pin gnu
