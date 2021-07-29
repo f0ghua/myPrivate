@@ -1,0 +1,10 @@
+myconf=~/myPrivate/customize/bash/conf_bashrc
+if [ -f $myconf ]; then
+    . $myconf
+fi
+
+myconf=~/myPrivate/customize/bash/conf_bash_aliases
+if [ -f $myconf ]; then
+    . $myconf
+fi
+

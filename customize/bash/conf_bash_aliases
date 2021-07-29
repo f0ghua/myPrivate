@@ -175,6 +175,5 @@ alias telnet_olt='telnet 172.21.16.229 -l foghua'
 alias unique="awk '! a[\$0]++'"
 alias mktag="sudo nice --adjustment=-10 /opt/soft/slickedit/bin/vsmktags $1"
 alias sz='find . -maxdepth 1 -type "d" -exec du -s {} \;|sort -n'
-#alias fcut='fn() { ffmpeg -ss $1 -i $3 -vcodec copy -acodec copy -to $2 $4;};
-fn'
+#alias fcut='fn() { ffmpeg -ss $1 -i $3 -vcodec copy -acodec copy -to $2 $4;};'
 alias ec='emacsclient -n'
