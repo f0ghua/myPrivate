@@ -56,6 +56,28 @@
              (expand-file-name "site-lisp"
                                user-emacs-directory))
 
+(setq my::xdoc-dir "d:/xDoc/mysite/pool")
+
+;;
+;; set PATH env
+;;
+(defun wttr/prepend-to-exec-path (path)
+  "prepand the path to the emacs intenral `exec-path' and \"PATH\" env variable.
+Return the updated `exec-path'"
+  (setenv "PATH" (concat (expand-file-name path)
+                         path-separator
+                         (getenv "PATH")))
+  (setq exec-path
+        (cons (expand-file-name path)
+              exec-path)))
+
+;; update exec path
+(mapc #'wttr/prepend-to-exec-path
+	  (reverse
+	   '(
+		 "d:/xPortable/iview458_x64"
+		 )))
+
 (require 'init-base)
 (require 'init-keybinding)
 (require 'init-ui)
@@ -71,6 +93,9 @@
 ;; (require 'init-yaml)
 ;; (require 'init-plantuml)
 (require 'init-org)
+(require 'init-export)
+;;(require 'init-tex)
+;(require 'init-latex)
 
 ;; variables configured via the interactive 'customize' interface
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

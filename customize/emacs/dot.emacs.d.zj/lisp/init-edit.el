@@ -55,7 +55,7 @@
   :config
   (setq counsel-ag-base-command "ag --vimgrep -i %s")
   (setq counsel-rg-base-command
-		"rg -i -M 120 --no-heading --line-number --color never %s .")
+		"rg -i -M 120 --no-heading --no-ignore --line-number --color never %s .")
   )
 
 (provide 'init-edit)
